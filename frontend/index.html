@@ -2,18 +2,192 @@
 <html lang="da">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bilwebshop</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>Bilhandel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <div class="bg-dark"></div>
-  <h1 class="text-center fw-semibold display-4">BILER DER ER TIL SALG</h1>
-  <p class="text-center text-muted">Køb din drømme bil i dag</p>
-  <div id="car-list" class="row g-4"></div>
+<body class="bg-gray-100 text-gray-900">
 
+  <div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6 text-center">Bilhandel App</h1>
 
-  <script src="app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Sektion: Biler -->
+    <h2 class="text-xl font-semibold mb-4">Tilgængelige biler</h2>
+    <div id="car-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+
+    <!-- Sektion: Kunder -->
+    <h2 class="text-xl font-semibold mt-10 mb-4">Kunder</h2>
+    <div id="customers-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+
+    <!-- Sektion: Kurv -->
+    <h2 class="text-xl font-semibold mt-10 mb-4">Kurv</h2>
+    <div id="cart-list" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4"></div>
+    <div>
+      <label class="block mb-2">Vælg kunde:</label>
+      <select id="customer-select" class="p-2 border rounded w-full mb-4"></select>
+      <button onclick="submitOrder()" class="bg-blue-600 text-white px-4 py-2 rounded">Afgiv ordre</button>
+    </div>
+
+    <!-- Sektion: Ordrer -->
+    <h2 class="text-xl font-semibold mt-10 mb-4">Ordrer</h2>
+    <div id="order-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+  </div>
+
+  <script>
+    let allCars = [];
+    let allCustomers = [];
+    let cart = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchCars();
+      fetchCustomers();
+      fetchOrders();
+      updateCartUI();
+    });
+
+    function fetchCars() {
+      fetch('http://localhost:3000/api/cars')
+        .then(res => res.json())
+        .then(cars => {
+          allCars = cars;
+          const carList = document.getElementById('car-list');
+          carList.innerHTML = '';
+          cars.forEach(car => {
+            const el = document.createElement('div');
+            el.className = 'bg-white p-4 rounded shadow';
+            el.innerHTML = `
+              <h3 class="font-bold text-lg">${car.brand} ${car.model}</h3>
+              <p>Pris: ${car.price} kr.</p>
+              <button class="mt-2 bg-green-600 text-white px-3 py-1 rounded" onclick="addToCart('${car._id}')">Tilføj til kurv</button>
+            `;
+            carList.appendChild(el);
+          });
+        });
+    }
+
+    function fetchCustomers() {
+      fetch('http://localhost:3000/api/customers')
+        .then(res => res.json())
+        .then(customers => {
+          allCustomers = customers;
+          const customersList = document.getElementById('customers-list');
+          const customerSelect = document.getElementById('customer-select');
+          customersList.innerHTML = '';
+          customerSelect.innerHTML = '<option value="">-- Vælg kunde --</option>';
+
+          customers.forEach(customer => {
+            // Til liste
+            const el = document.createElement('div');
+            el.className = 'bg-white p-4 rounded shadow';
+            el.innerHTML = `
+              <h3 class="font-bold">${customer.name}</h3>
+              <p>${customer.email}</p>
+              <p>${customer.phone}</p>
+              <p>${customer.address}</p>
+            `;
+            customersList.appendChild(el);
+
+            // Til dropdown
+            const option = document.createElement('option');
+            option.value = customer._id;
+            option.textContent = customer.name;
+            customerSelect.appendChild(option);
+          });
+        });
+    }
+
+    function fetchOrders() {
+      fetch('http://localhost:3000/api/orders')
+        .then(res => res.json())
+        .then(orders => {
+          const orderList = document.getElementById('order-list');
+          orderList.innerHTML = '';
+          orders.forEach(order => {
+            const el = document.createElement('div');
+            el.className = 'bg-white p-4 rounded shadow';
+            el.innerHTML = `
+              <h4 class="font-bold">Ordre ID: ${order._id}</h4>
+              <p>Bil ID: ${order.carId}</p>
+              <p>Ordredato: ${new Date(order.orderDate).toLocaleDateString()}</p>
+              <p>Status: ${order.status}</p>
+              <p>Pris: ${order.totalPrice} kr.</p>
+              <p>Antal: ${order.quantity}</p>
+              
+              
+            `;
+            orderList.appendChild(el);
+          });
+        });
+    }
+
+    function addToCart(carId) {
+      const car = allCars.find(c => c._id === carId);
+      const existing = cart.find(item => item.carId === carId);
+      if (existing) {
+        existing.quantity++;
+      } else {
+        cart.push({
+          carId: car._id,
+          brand: car.brand,
+          model: car.model,
+          price: car.price,
+          quantity: 1
+        });
+      }
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const cartList = document.getElementById('cart-list');
+      cartList.innerHTML = '';
+      if (cart.length === 0) {
+        cartList.innerHTML = '<p class="text-gray-500">Kurven er tom.</p>';
+        return;
+      }
+
+      cart.forEach(item => {
+        const el = document.createElement('div');
+        el.className = 'bg-white p-4 rounded shadow';
+        el.innerHTML = `
+          <h3 class="font-bold">${item.brand} ${item.model}</h3>
+          <p>Pris: ${item.price} kr.</p>
+          <p>Antal: ${item.quantity}</p>
+        `;
+        cartList.appendChild(el);
+      });
+    }
+
+    function submitOrder() {
+      const customerId = document.getElementById('customer-select').value;
+      if (!customerId || cart.length === 0) {
+        alert('Vælg en kunde og tilføj mindst én bil til kurven.');
+        return;
+      }
+
+      cart.forEach(item => {
+        const order = {
+          carId: item.carId,
+          userId: customerId,
+          quantity: item.quantity,
+          totalPrice: item.price * item.quantity,
+          status: 'pending',
+          orderDate: new Date().toISOString()
+        };
+
+        fetch('http://localhost:3000/api/orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(order)
+        })
+          .then(res => res.json())
+          .then(() => {
+            alert('Ordre oprettet!');
+            fetchOrders();
+            cart = [];
+            updateCartUI();
+          })
+          .catch(err => console.error('Fejl ved ordre:', err));
+      });
+    }
+  </script>
 </body>
 </html>

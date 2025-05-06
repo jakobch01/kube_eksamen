@@ -1,22 +1,39 @@
+
 const express = require('express');
 const Order = require('../models/Order');
+const Car = require('../models/Car');
 const router = express.Router();
 
-router.post('/', async (req, res) => { 
-    console.log(req.body);
-    const newOrder = new Order(req.body);
-    try {
-        // Save the new order to MongoDB
-        await newOrder.save();  
-        
-        // Return the saved order
-        res.status(201).json(newOrder);  
-    } catch (error) {
-        res.status(400).json({ 
-            message: 'Error creating order', 
-            error }); 
+router.post('/', async (req, res) => {
+  try {
+    const { carId, quantity } = req.body;
+
+    const car = await Car.findById(carId);
+    if (!car) {
+      return res.status(404).json({ message: "Car not found" });
     }
+
+    const totalPrice = car.price * quantity;
+
+    const newOrder = new Order({
+      carId,
+      quantity,
+      totalPrice,
+      status: "pending", // default status
+      orderDate: new Date()
+    });
+
+    await newOrder.save();
+    res.status(201).json(newOrder);
+  } catch (err) {
+    console.error("Fejl ved oprettelse af ordre:", err);
+    res.status(500).json({
+      message: "Error creating order",
+      error: err.errors || err.message || err.toString()
+    });
+  }
 });
+
 
 router.get('/', async (req, res) => { 
     try {
