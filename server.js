@@ -10,12 +10,14 @@ app.use(cors());
 
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/bilDB', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/bilDB';
+
+mongoose.connect(mongoURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
 })
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.log(err));
+.then(() => console.log('✅ Connected to MongoDB'))
+.catch(err => console.error('❌ Error connecting to database:', err));
 
 // Routes
 app.use('/api/cars', require('./routes/carRoutes'));
