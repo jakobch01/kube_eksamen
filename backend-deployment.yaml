@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: jakobch01/backend:latest
+        ports:
+        - containerPort: 4000
+        env:
+        - name: DB_HOST
+          value: mongodb-service          
+        - name: DB_PORT
+          value: "27017"                  
+        - name: DB_USER
+          value: admin                    
+        - name: DB_PASS
+          value: secret                   
+        - name: DB_NAME
+          value: webshop                  
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: backend
+  ports:
+  - port: 4000
+    targetPort: 4000

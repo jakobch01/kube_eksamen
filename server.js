@@ -3,6 +3,14 @@ const mongoose = require('mongoose');
 const app = express();
 const cors = require('cors');
 
+const dbUser = process.env.DB_USER || 'admin';
+const dbPass = process.env.DB_PASS || 'secret';
+const dbHost = process.env.DB_HOST || 'mongodb-service';
+const dbPort = process.env.DB_PORT || '27017';
+const dbName = process.env.DB_NAME || 'webshop';
+
+const mongoUri = `mongodb://${dbUser}:${dbPass}@${dbHost}:${dbPort}/${dbName}?authSource=admin`;
+
 
 // Middleware
 app.use(express.json());
@@ -10,10 +18,7 @@ app.use(cors());
 
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/bilDB', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
+mongoose.connect(mongoUri)
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.log(err));
 
