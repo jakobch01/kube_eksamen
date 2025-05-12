@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 const cors = require('cors');
+const mongoURI = process.env.MONGO_URI || 'mongodb://mongodb:27017/bilDB';
+
 
 
 // Middleware
@@ -10,8 +12,6 @@ app.use(cors());
 
 
 // MongoDB connection
-const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/bilDB';
-
 mongoose.connect(mongoURI, {
   useNewUrlParser: true,
   useUnifiedTopology: true

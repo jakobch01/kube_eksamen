@@ -45,7 +45,7 @@
     });
 
     function fetchCars() {
-      fetch('http://localhost:3000/api/cars')
+      fetch('http://backend-container:3000/api/cars')
         .then(res => res.json())
         .then(cars => {
           allCars = cars;
@@ -65,7 +65,7 @@
     }
 
     function fetchCustomers() {
-      fetch('http://localhost:3000/api/customers')
+      fetch('http://backend-container:3000/api/customers')
         .then(res => res.json())
         .then(customers => {
           allCustomers = customers;
@@ -96,7 +96,7 @@
     }
 
     function fetchOrders() {
-      fetch('http://localhost:3000/api/orders')
+      fetch('http://backend-container:3000/api/orders')
         .then(res => res.json())
         .then(orders => {
           const orderList = document.getElementById('order-list');
@@ -173,7 +173,7 @@
           orderDate: new Date().toISOString()
         };
 
-        fetch('http://localhost:3000/api/orders', {
+        fetch('http://backend-container:3000/api/orders', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(order)
