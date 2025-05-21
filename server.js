@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 const cors = require('cors');
+const mongoURI = process.env.MONGO_URI | 'mongodb://localhost:27017/bilDB';
+
 
 const dbUser = process.env.DB_USER || 'admin';
 const dbPass = process.env.DB_PASS || 'secret';
@@ -18,9 +20,13 @@ app.use(cors());
 
 
 // MongoDB connection
-mongoose.connect(mongoUri)
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.log(err));
+
+mongoose.connect(mongoURI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+})
+.then(() => console.log('✅ Connected to MongoDB'))
+.catch(err => console.error('❌ Error connecting to database:', err));
 
 
 // Routes
