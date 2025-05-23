@@ -2,7 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const app = express();
 const cors = require('cors');
-const mongoURI = process.env.MONGO_URI | 'mongodb://localhost:27017/bilDB';
+const mongoURI = process.env.MONGO_URI;
 
 
 

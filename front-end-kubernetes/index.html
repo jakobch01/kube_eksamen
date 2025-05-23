@@ -45,7 +45,7 @@
     });
 
     function fetchCars() {
-      fetch('http://backend-container:3000/api/cars')
+      fetch('http://127.0.0.1:3000/api/cars')
         .then(res => res.json())
         .then(cars => {
           allCars = cars;
