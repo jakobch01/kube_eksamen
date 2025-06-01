@@ -10,15 +10,12 @@
   <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold mb-6 text-center">Bilhandel App</h1>
 
-    <!-- Sektion: Biler -->
     <h2 class="text-xl font-semibold mb-4">Tilgængelige biler</h2>
     <div id="car-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
 
-    <!-- Sektion: Kunder -->
     <h2 class="text-xl font-semibold mt-10 mb-4">Kunder</h2>
     <div id="customers-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
 
-    <!-- Sektion: Kurv -->
     <h2 class="text-xl font-semibold mt-10 mb-4">Kurv</h2>
     <div id="cart-list" class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4"></div>
     <div>
@@ -27,12 +24,13 @@
       <button onclick="submitOrder()" class="bg-blue-600 text-white px-4 py-2 rounded">Afgiv ordre</button>
     </div>
 
-    <!-- Sektion: Ordrer -->
     <h2 class="text-xl font-semibold mt-10 mb-4">Ordrer</h2>
     <div id="order-list" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
   </div>
 
   <script>
+    const BASE_URL = 'http://kubeapp.local'; // Ingress domain
+
     let allCars = [];
     let allCustomers = [];
     let cart = [];
@@ -45,7 +43,7 @@
     });
 
     function fetchCars() {
-      fetch('http://127.0.0.1:3000/api/cars')
+      fetch(`${BASE_URL}/api/cars`)
         .then(res => res.json())
         .then(cars => {
           allCars = cars;
@@ -65,7 +63,7 @@
     }
 
     function fetchCustomers() {
-      fetch('http://backend-container:3000/api/customers')
+      fetch(`${BASE_URL}/api/customers`)
         .then(res => res.json())
         .then(customers => {
           allCustomers = customers;
@@ -75,7 +73,6 @@
           customerSelect.innerHTML = '<option value="">-- Vælg kunde --</option>';
 
           customers.forEach(customer => {
-            // Til liste
             const el = document.createElement('div');
             el.className = 'bg-white p-4 rounded shadow';
             el.innerHTML = `
@@ -86,7 +83,6 @@
             `;
             customersList.appendChild(el);
 
-            // Til dropdown
             const option = document.createElement('option');
             option.value = customer._id;
             option.textContent = customer.name;
@@ -96,7 +92,7 @@
     }
 
     function fetchOrders() {
-      fetch('http://backend-container:3000/api/orders')
+      fetch(`${BASE_URL}/api/orders`)
         .then(res => res.json())
         .then(orders => {
           const orderList = document.getElementById('order-list');
@@ -111,8 +107,6 @@
               <p>Status: ${order.status}</p>
               <p>Pris: ${order.totalPrice} kr.</p>
               <p>Antal: ${order.quantity}</p>
-              
-              
             `;
             orderList.appendChild(el);
           });
@@ -173,7 +167,7 @@
           orderDate: new Date().toISOString()
         };
 
-        fetch('http://backend-container:3000/api/orders', {
+        fetch(`${BASE_URL}/api/orders`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(order)
